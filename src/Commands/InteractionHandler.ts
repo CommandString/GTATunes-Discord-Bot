@@ -1,4 +1,4 @@
-import {ChatInputCommandInteraction, Interaction} from "discord.js";
+import { ChatInputCommandInteraction, Interaction } from 'discord.js';
 
 export abstract class InteractionHandler {
     abstract shouldHandle(interaction: Interaction): boolean;
@@ -6,12 +6,14 @@ export abstract class InteractionHandler {
 }
 
 export abstract class ApplicationCommandHandler extends InteractionHandler {
-    readonly abstract commandName: string;
+    abstract readonly commandName: string;
 
     shouldHandle(interaction: Interaction): boolean {
-        return interaction.isCommand() && interaction.commandName === this.commandName;
+        return (
+            interaction.isCommand() &&
+            interaction.commandName === this.commandName
+        );
     }
 
     abstract handle(interaction: ChatInputCommandInteraction): Promise<void>;
 }
-

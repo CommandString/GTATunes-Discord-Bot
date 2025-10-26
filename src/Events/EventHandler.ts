@@ -1,9 +1,9 @@
-import {ClientEvents} from "discord.js";
+import { ClientEvents } from 'discord.js';
 
 export type ClientEventName = keyof ClientEvents;
 
-export default abstract class EventHandler {
-    abstract readonly event: ClientEventName;
+export default abstract class EventHandler<Event extends ClientEventName> {
+    abstract readonly event: Event;
 
-    abstract handle(...args: ClientEvents[ClientEventName]): Promise<void>;
+    abstract handle(...args: ClientEvents[Event]): Promise<void>;
 }

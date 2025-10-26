@@ -2,3 +2,5 @@ dist
 .idea
 .env
 node_modules
+.vscode
+player-states.json
