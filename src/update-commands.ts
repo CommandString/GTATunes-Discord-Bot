@@ -32,7 +32,10 @@ const rest = new REST({ version: '10' }).setToken(env.TOKEN);
 
         await rest.put(Routes.applicationCommands(env.ID), { body: commands });
 
-        gtaTunesLog('INFO', p.green('Successfully reloaded application slash commands.'));
+        gtaTunesLog(
+            'INFO',
+            p.green('Successfully reloaded application slash commands.')
+        );
         gtaTunesLog(
             'INFO',
             `${commands.map(command => p.green(command.name)).join(', ')}`
