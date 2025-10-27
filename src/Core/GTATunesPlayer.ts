@@ -343,9 +343,10 @@ export class Player extends EventEmitter<PlayerEventMap> {
     stop(reset: boolean = false): void {
         if (reset) {
             this._currentSong =
-            this._currentSongDuration =
-            this._currentStation =
-            this._currentSongUrl = null;
+                this._currentSongDuration =
+                this._currentStation =
+                this._currentSongUrl =
+                    null;
             this._currentSeeked = 0;
         }
 
@@ -582,7 +583,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
             return null;
         }
 
-        return (timestamp / 1000) + this._currentSeeked;
+        return timestamp / 1000 + this._currentSeeked;
     }
 
     static create(

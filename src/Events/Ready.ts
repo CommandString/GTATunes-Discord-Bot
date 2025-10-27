@@ -113,11 +113,7 @@ export default class Ready extends EventHandler<'clientReady'> {
                 continue;
             }
 
-            const player = await Player.create(
-                guild,
-                voiceChannel,
-                owner.user
-            );
+            const player = await Player.create(guild, voiceChannel, owner.user);
 
             if (!state.playback) {
                 return;
