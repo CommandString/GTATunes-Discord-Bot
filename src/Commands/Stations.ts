@@ -99,7 +99,6 @@ export default class StationsCommand extends ApplicationCommandHandler {
                 new ActionRowBuilder<ButtonBuilder>({
                     components: row.map(s =>
                         new ButtonBuilder({
-                            // label: `Play ${s.name}`,
                             style: ButtonStyle.Secondary,
                             customId: `play-station-${s.game_key}-${s.key}`
                         }).setEmoji(getStationEmoji(s.game_key, s.key))
@@ -201,52 +200,5 @@ export default class StationsCommand extends ApplicationCommandHandler {
             components: [this.generateStationContainer(station)],
             flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
         });
-
-        // const stationColors = getGameStationColors(game, stationKey);
-
-        // let colorIndex = 0;
-        // const getColor = (): HexColorString => {
-        //     const color = stationColors[colorIndex];
-
-        //     colorIndex++;
-
-        //     if (colorIndex > stationColors.length) {
-        //         colorIndex = 0;
-        //     }
-
-        //     return color;
-        // };
-
-        // const metaEmbed = new EmbedBuilder();
-
-        // metaEmbed.setTitle(station.name);
-        // metaEmbed.setAuthor({
-        //     name: formatGameKey(game),
-        //     iconURL: fullGTATunesUrl(`/${station.game_key}.png`)
-        // });
-        // metaEmbed.setThumbnail(fullGTATunesUrl(station.icon));
-        // metaEmbed.setColor(getColor());
-
-        // const songEmbeds = chunkArray([...station.songs], 25).map(songs => {
-        //     const embed = new EmbedBuilder();
-
-        //     // if (i === 0) {
-        //     //     embed.setDescription(`### ${station.songs.length} songs.`);
-        //     // }
-
-        //     embed.setColor(getColor());
-        //     embed.addFields(
-        //         songs.map(s => ({
-        //             name: s.name,
-        //             value: s.artists.join(', ')
-        //         }))
-        //     );
-
-        //     return embed;
-        // });
-
-        // await interaction.reply({
-        //     embeds: [metaEmbed, ...songEmbeds]
-        // });
     }
 }
