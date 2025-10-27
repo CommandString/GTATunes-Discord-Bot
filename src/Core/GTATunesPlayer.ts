@@ -123,7 +123,6 @@ export class Player extends EventEmitter<PlayerEventMap> {
     protected _currentSongUrl: string | null = null;
     protected _currentSongDuration: number | null = null;
     protected _currentSeeked: number = 0;
-    protected resource: AudioResource | null = null;
     private destroying: boolean = false;
     private locked: boolean = false;
     private autoplay: boolean = false;
@@ -148,6 +147,16 @@ export class Player extends EventEmitter<PlayerEventMap> {
             'PLAYER',
             `Created in ${c(guild.name)} [${c(guild.id)}, ${c(voiceChannel.id)}]`
         );
+    }
+
+    protected get resource(): AudioResource | null {
+        const status = this.player.state.status;
+
+        if (status === AudioPlayerStatus.Idle) {
+            return null;
+        }
+
+        return this.player.state.resource ?? null;
     }
 
     private setupEvents(): void {
@@ -333,11 +342,9 @@ export class Player extends EventEmitter<PlayerEventMap> {
     stop(reset: boolean = false): void {
         if (reset) {
             this._currentSong =
-                this._currentSongDuration =
-                this._currentStation =
-                this._currentSongUrl =
-                this.resource =
-                    null;
+            this._currentSongDuration =
+            this._currentStation =
+            this._currentSongUrl = null;
             this._currentSeeked = 0;
         }
 
@@ -434,7 +441,6 @@ export class Player extends EventEmitter<PlayerEventMap> {
 
         this.player.play(resource);
 
-        this.resource = resource;
         this._currentSong = song;
         this._currentSongUrl = audioUrl;
         this._currentSongDuration = duration;
@@ -492,7 +498,6 @@ export class Player extends EventEmitter<PlayerEventMap> {
             inputType: type
         });
 
-        this.resource = newResource;
         this.player.play(newResource);
     }
 
