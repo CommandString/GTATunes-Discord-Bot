@@ -109,14 +109,14 @@ export default class Ready extends EventHandler<'clientReady'> {
                 .fetch(state.owner)
                 .catch(() => null);
 
-            if (!owner) {
+            if (!owner || !owner.user) {
                 continue;
             }
 
             const player = await Player.create(
                 guild,
                 voiceChannel,
-                state.owner
+                owner.user
             );
 
             if (!state.playback) {

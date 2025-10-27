@@ -33,6 +33,7 @@ import {
     ModalBuilder,
     ModalData,
     ModalSubmitInteraction,
+    User,
     VoiceBasedChannel
 } from 'discord.js';
 import { Api } from './api';
@@ -133,7 +134,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
         protected readonly player: AudioPlayer,
         public readonly guild: Guild,
         public readonly voiceChannel: VoiceBasedChannel,
-        public readonly ownerId: string
+        public readonly owner: User
     ) {
         super();
 
@@ -587,7 +588,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
     static create(
         guild: Guild,
         voiceChannel: VoiceBasedChannel,
-        ownerId: string
+        owner: User
     ): Promise<Player> {
         return new Promise((resolve, reject) => {
             const playerManager = usePlayerManager();
@@ -620,7 +621,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
                         audioPlayer,
                         guild,
                         voiceChannel,
-                        ownerId
+                        owner
                     );
 
                     playerManager.addPlayer(player);
@@ -639,7 +640,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
                 audioPlayer,
                 guild,
                 voiceChannel,
-                ownerId
+                owner
             );
 
             playerManager.addPlayer(player);
@@ -688,7 +689,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
         return await Player.create(
             interaction.guild,
             member.voice.channel,
-            member.id
+            member.user
         );
     }
 
@@ -696,7 +697,8 @@ export class Player extends EventEmitter<PlayerEventMap> {
         return {
             guild: this.guild.id,
             voiceChannel: this.voiceChannel.id,
-            owner: this.ownerId,
+            owner: this.owner.id,
+            authorized_users: [],
             messageControllers:
                 this.messageController.getAllMessageInformation(),
             playback: this.currentSong
@@ -881,6 +883,7 @@ export type PlayerAutosaveState = {
     guild: string;
     voiceChannel: string;
     owner: string;
+    authorized_users: string[];
     playback?: {
         song: Api.Song<Api.GameKey>;
         timestamp: number;
