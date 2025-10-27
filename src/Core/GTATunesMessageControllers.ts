@@ -44,6 +44,7 @@ export type MessageInformation = [string, string];
 export class MessageController {
     private controllerMessages: MessageInformation[] = [];
     private lastUpdatedTimestamp = 0;
+    private updateTimeout: NodeJS.Timeout | null = null;
 
     public constructor(public readonly player: Player) {
         this.setupEvents();
@@ -51,7 +52,17 @@ export class MessageController {
 
     private setupEvents(): void {
         const playerEvent = this.player.on.bind(this.player);
-        const updateMessages = this.updateControllerMessages.bind(this);
+        let updateMessagesTimeout: NodeJS.Timeout | null = null;
+        const updateMessages = () => {
+            if (updateMessagesTimeout) {
+                clearTimeout(updateMessagesTimeout);
+            }
+
+            updateMessagesTimeout = setTimeout(async () => {
+                await this.updateControllerMessages();
+                updateMessagesTimeout = null;
+            }, 1000);
+        };
 
         const progressCheckInterval = setInterval(() => {
             if (!this.player.isPlaying) {
