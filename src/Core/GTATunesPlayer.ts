@@ -573,7 +573,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
     }
 
     /**
-     * @returns timestamp in ms
+     * @returns timestamp in seconds
      */
     get currentTimestamp(): number | null {
         const timestamp = this.resource?.playbackDuration ?? null;
@@ -582,7 +582,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
             return null;
         }
 
-        return timestamp + this._currentSeeked * 1000;
+        return (timestamp / 1000) + this._currentSeeked;
     }
 
     static create(

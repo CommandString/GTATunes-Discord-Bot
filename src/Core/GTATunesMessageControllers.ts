@@ -234,7 +234,7 @@ export class MessageController {
                 return null;
             }
 
-            const progress = timestamp / 1000 / duration;
+            const progress = timestamp / duration;
 
             const BAR_WIDTH = 10;
             let BAR_INDICATOR_POSITION = Math.round(progress * BAR_WIDTH);
@@ -262,7 +262,7 @@ export class MessageController {
                 return null;
             }
 
-            return `**${formatTimestamp(timestamp / 1000)}** - **${formatTimestamp(duration)}**`;
+            return `**${formatTimestamp(timestamp)}** - **${formatTimestamp(duration)}**`;
         };
 
         container
