@@ -122,7 +122,7 @@ export default class Ready extends EventHandler<'clientReady'> {
             await player.playSong(state.playback.song);
 
             if (state.playback.timestamp > 10) {
-                await player.seek(state.playback.timestamp / 1000);
+                await player.seek(state.playback.timestamp);
             }
 
             if (state.playback.paused) {
