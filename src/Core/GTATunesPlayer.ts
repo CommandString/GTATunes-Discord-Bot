@@ -302,7 +302,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
     ): Promise<ReturnType<PlayerEventMap[K]>[]> {
         gtaTunesLog(
             'PLAYER',
-            `${p.magenta(event.toUpperCase())} event emitted in ${p.magenta(this.guild.id)}.`
+            `${p.magenta(event.toUpperCase())} event emitted in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`
         );
 
         return super.emit(event, ...args);
