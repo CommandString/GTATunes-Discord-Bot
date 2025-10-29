@@ -1,13 +1,13 @@
 import { REST, Routes } from 'discord.js';
-import { PlayConfig } from './Commands/Play';
-import { StationsConfig } from './Commands/Stations';
-import { VersionConfig } from './Commands/Version';
-import useEnv from './env';
-import { setGTATunesSDK } from './Core/useGTATunesSDK';
-import GTATunesSDK from './Core/GTATunesSDK';
-import { PlayerConfig } from './Commands/Player';
-import { InfoConfig } from './Commands/Info';
-import { figletText, gtaTunesLog } from './Core/logger';
+import { PlayConfig } from '../Commands/Play';
+import { StationsConfig } from '../Commands/Stations';
+import { VersionConfig } from '../Commands/Version';
+import useEnv from '../env';
+import { setGTATunesSDK } from '../Core/useGTATunesSDK';
+import GTATunesSDK from '../Core/GTATunesSDK';
+import { PlayerConfig } from '../Commands/Player';
+import { InfoConfig } from '../Commands/Info';
+import { figletText, gtaTunesLog } from '../Core/logger';
 import p from 'picocolors';
 
 const env = useEnv();
