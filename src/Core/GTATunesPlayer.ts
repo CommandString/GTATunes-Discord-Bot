@@ -712,6 +712,62 @@ export class Player extends EventEmitter<PlayerEventMap> {
             settings: this.settings.getAll()
         };
     }
+
+    /**
+     * Locks the player and executes the given action.
+     *
+     * @param action The action to execute while the player is locked.
+     * @param interaction Optional Discord interaction for error handling.
+     * @throws {LockedPlayerError} if the player is already locked and no interaction is provided.
+     * @returns The result of the action or null if handled via interaction.
+     */
+    async lock(action: () => PossiblyAsync<void>, interaction?: Interaction): Promise<boolean> {
+        if (this.locked) {
+            gtaTunesLog('PLAYER', `Player in guild ${this.guild.name} (${this.guild.id}) is already locked.`);
+
+            if (interaction) {
+                await LockedPlayerError.handleInteraction(interaction);
+                return false;
+            }
+
+            throw new LockedPlayerError(this);
+        }
+
+        gtaTunesLog('PLAYER', `Locking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`);
+        this.locked = true;
+
+        try {
+            await action();
+        } catch (e) {
+            gtaTunesLog('PLAYER', `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`);
+            this.locked = false;
+            throw e;
+        }
+
+        gtaTunesLog('PLAYER', `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`);
+        this.locked = false;
+
+        return true;
+    }
+}
+
+export class LockedPlayerError extends Error {
+    constructor(player: Player) {
+        super(
+            `Player in guild ${player.guild.name} (${player.guild.id}) is currently locked.`
+        );
+    }
+
+    static async handleInteraction(interaction: Interaction): Promise<void> {
+        if (!interaction.isRepliable()) {
+            return;
+        }
+
+        await interaction.reply({
+            content: 'The player is currently busy processing another action.',
+            flags: MessageFlags.Ephemeral
+        });
+    }
 }
 
 export type Settings = {
