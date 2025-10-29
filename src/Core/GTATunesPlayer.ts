@@ -118,16 +118,16 @@ export class PlayerManager extends EventEmitter<PlayerManagerEventMap> {
 
 export class Player extends EventEmitter<PlayerEventMap> {
     public readonly settings: PlayerSettings;
-    protected _currentStation: Api.Station<Api.GameKey, true, false> | null =
+    public readonly messageController: MessageController;
+    private _currentStation: Api.Station<Api.GameKey, true, false> | null =
         null;
-    protected _currentSong: Api.Song<Api.GameKey> | null = null;
-    protected _currentSongUrl: string | null = null;
-    protected _currentSongDuration: number | null = null;
-    protected _currentSeeked: number = 0;
+    private _currentSong: Api.Song<Api.GameKey> | null = null;
+    private _currentSongUrl: string | null = null;
+    private _currentSongDuration: number | null = null;
+    private _currentSeeked: number = 0;
     private destroying: boolean = false;
     private locked: boolean = false;
     private autoplay: boolean = false;
-    public readonly messageController: MessageController;
 
     constructor(
         protected connection: VoiceConnection,
