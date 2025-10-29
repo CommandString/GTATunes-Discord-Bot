@@ -27,7 +27,7 @@ import {
     createLines,
     formatTimestamp
 } from './functions';
-import { GTATunesEmoji } from './enums';
+import { GTATunesEmoji } from './GTATunesEmoji';
 import EventHandler from '../Events/EventHandler';
 import useGTATunesSDK from './useGTATunesSDK';
 import { gtaTunesLog } from './logger';
@@ -44,7 +44,6 @@ export type MessageInformation = [string, string];
 export class MessageController {
     private controllerMessages: MessageInformation[] = [];
     private lastUpdatedTimestamp = 0;
-    private updateTimeout: NodeJS.Timeout | null = null;
 
     public constructor(public readonly player: Player) {
         this.setupEvents();
@@ -473,86 +472,105 @@ export class MessageControllerInteractionHandler extends InteractionHandler {
             return;
         }
 
-        if (
-            !player.messageController.hasMessage(interaction.message.id) &&
-            !player.messageController.addMessage(
-                interaction.message as Message<true>
-            ) &&
-            action !== 'create'
-        ) {
-            await interaction.message.delete();
-        }
-
-        const actionHandlerMap: Record<string, () => Promise<void>> = {
-            play: async () => {
-                if (player.isPaused) {
-                    player.resume();
-                } else {
-                    player.pause();
-                }
-            },
-            previous: async () => {
+        try {
+            await player.lock(async () => {
                 if (
-                    player.currentTimestamp !== null &&
-                    player.currentTimestamp > 5000
-                ) {
-                    return await player.seek(0);
-                }
-
-                await player.playSong('previous');
-            },
-            next: () => player.playSong('next'),
-            stop: async () => player.destroy(),
-            next_station: () => player.playStation('next'),
-            previous_station: () => player.playStation('previous'),
-            create: async () => {
-                if (!interaction.channel) {
-                    return;
-                }
-
-                await player.messageController.create(interaction.channel.id);
-            },
-            settings: async () => {
-                const modal = player.settings.createModal();
-
-                await interaction.showModal(modal);
-            },
-            delete: async () => {
-                if (!interaction.isMessageComponent()) {
-                    return;
-                }
-
-                const messageController = player.messageController;
-                const messageInformation =
-                    messageController.getMessageInformation(
+                    !player.messageController.hasMessage(
                         interaction.message.id
-                    );
+                    ) &&
+                    !player.messageController.addMessage(
+                        interaction.message as Message<true>
+                    ) &&
+                    action !== 'create'
+                ) {
+                    await interaction.message.delete();
+                }
 
-                if (!messageInformation) {
+                const actionHandlerMap: Record<string, () => Promise<void>> = {
+                    play: async () => {
+                        if (player.isPaused) {
+                            player.resume();
+                        } else {
+                            player.pause();
+                        }
+                    },
+                    previous: async () => {
+                        if (
+                            player.currentTimestamp !== null &&
+                            player.currentTimestamp > 5000
+                        ) {
+                            return await player.seek(0);
+                        }
+
+                        await player.playSong('previous');
+                    },
+                    next: () => player.playSong('next'),
+                    stop: async () => player.destroy(),
+                    next_station: () => player.playStation('next'),
+                    previous_station: () => player.playStation('previous'),
+                    create: async () => {
+                        if (!interaction.channel) {
+                            return;
+                        }
+
+                        await player.messageController.create(
+                            interaction.channel.id
+                        );
+                    },
+                    settings: async () => {
+                        const modal = player.settings.createModal();
+
+                        await interaction.showModal(modal);
+                    },
+                    delete: async () => {
+                        if (!interaction.isMessageComponent()) {
+                            return;
+                        }
+
+                        const messageController = player.messageController;
+                        const messageInformation =
+                            messageController.getMessageInformation(
+                                interaction.message.id
+                            );
+
+                        if (!messageInformation) {
+                            return;
+                        }
+
+                        await messageController.deleteControllerMessage(
+                            messageInformation
+                        );
+                    }
+                };
+
+                const actionHandler = actionHandlerMap[action] ?? null;
+
+                if (!actionHandler) {
+                    await interaction.reply({
+                        content: 'Invalid player controller action.',
+                        flags: MessageFlags.Ephemeral
+                    });
+
                     return;
                 }
 
-                await messageController.deleteControllerMessage(
-                    messageInformation
-                );
-            }
-        };
+                await actionHandler.bind(this)();
 
-        const actionHandler = actionHandlerMap[action] ?? null;
-
-        if (!actionHandler) {
+                if (!interaction.replied) {
+                    await interaction.deferUpdate();
+                }
+            }, interaction);
+        } catch (e) {
+            gtaTunesLog(
+                'PLAYER',
+                `Failed to handle controller interaction in ${player.guild.name} (${player.guild.id})`,
+                e
+            );
             await interaction.reply({
-                content: 'Invalid player controller action.',
+                content:
+                    'Failed to perform controller action. Please try again later.',
                 flags: MessageFlags.Ephemeral
             });
-
-            return;
-        }
-
-        await actionHandler.bind(this)();
-
-        if (!interaction.replied) {
-            await interaction.deferUpdate();
         }
     }
 }

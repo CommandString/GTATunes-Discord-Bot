@@ -17,6 +17,7 @@ import useGTATunesSDK from '../Core/useGTATunesSDK';
 import { Api } from '../Core/api';
 import { Player, usePlayerManager } from '../Core/GTATunesPlayer';
 import { randomArrayItem } from '../Core/functions';
+import { gtaTunesLog } from '../Core/logger';
 
 /** @ts-ignore */
 export const PlayConfig: ApplicationCommand = {
@@ -141,32 +142,57 @@ export class PlayCommand extends ApplicationCommandHandler {
             }
         }
 
-        interaction
-            .reply({
-                content: created
-                    ? `Started GTATunes player in <#${player.voiceChannel.id}>.`
-                    : 'Changing song...',
-                flags: MessageFlags.Ephemeral,
-                components:
-                    player.messageController.messageIds.length === 0
-                        ? [
-                              new ActionRowBuilder<ButtonBuilder>({
-                                  components: [
-                                      new ButtonBuilder({
-                                          label: 'Create Controller',
-                                          style: ButtonStyle.Primary,
-                                          customId: `controller-create-${interaction.guildId!}`
+        try {
+            await player.lock(async () => {
+                await (song
+                    ? player.playSong(song, station)
+                    : player.playStation(station));
+
+                const currentSong = player.currentSong!;
+                const currentStation = player.currentStation!;
+
+                interaction
+                    .reply({
+                        content: created
+                            ? `Started GTATunes player in <#${player.voiceChannel.id}>.`
+                            : `Now playing **${currentSong.name}** by **${currentSong.artists.join(', ')}** on **${currentStation.name}**.`,
+                        flags: MessageFlags.Ephemeral,
+                        components:
+                            player.messageController.messageIds.length === 0
+                                ? [
+                                      new ActionRowBuilder<ButtonBuilder>({
+                                          components: [
+                                              new ButtonBuilder({
+                                                  label: 'Create Controller',
+                                                  style: ButtonStyle.Primary,
+                                                  customId: `controller-create-${interaction.guildId!}`
+                                              })
+                                          ]
                                       })
                                   ]
-                              })
-                          ]
-                        : []
-            })
-            .catch(e => console.error('Failed to respond to interaction.', e));
+                                : []
+                    })
+                    .catch(e =>
+                        gtaTunesLog(
+                            'FAIL',
+                            'Failed to respond to interaction.',
+                            e
+                        )
+                    );
+            }, interaction);
+        } catch (e) {
+            gtaTunesLog(
+                'PLAYER',
+                `Failed to handle play command in ${interaction.guild.name} (${interaction.guild.id})`,
+                e
+            );
 
-        await (song
-            ? player.playSong(song, station)
-            : player.playStation(station));
+            await interaction.reply({
+                content:
+                    'Failed to play requested item. Please try again later.',
+                flags: MessageFlags.Ephemeral
+            });
+        }
     }
 }
 

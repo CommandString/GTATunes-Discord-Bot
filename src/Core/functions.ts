@@ -17,7 +17,7 @@ import {
     Interaction,
     MessageFlags
 } from 'discord.js';
-import { GTATunesEmoji } from './enums';
+import { GTATunesEmoji } from './GTATunesEmoji';
 import moment from 'moment';
 import { readdirSync } from 'fs';
 import path from 'path';

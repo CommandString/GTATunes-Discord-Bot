@@ -721,9 +721,15 @@ export class Player extends EventEmitter<PlayerEventMap> {
      * @throws {LockedPlayerError} if the player is already locked and no interaction is provided.
      * @returns The result of the action or null if handled via interaction.
      */
-    async lock(action: () => PossiblyAsync<void>, interaction?: Interaction): Promise<boolean> {
+    async lock(
+        action: () => PossiblyAsync<void>,
+        interaction?: Interaction
+    ): Promise<boolean> {
         if (this.locked) {
-            gtaTunesLog('PLAYER', `Player in guild ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}) is already locked.`);
+            gtaTunesLog(
+                'PLAYER',
+                `Player in guild ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}) is already locked.`
+            );
 
             if (interaction) {
                 await LockedPlayerError.handleInteraction(this, interaction);
@@ -733,18 +739,27 @@ export class Player extends EventEmitter<PlayerEventMap> {
             throw new LockedPlayerError(this);
         }
 
-        gtaTunesLog('PLAYER', `Locking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`);
+        gtaTunesLog(
+            'PLAYER',
+            `Locking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`
+        );
         this.locked = true;
 
         try {
             await action();
         } catch (e) {
-            gtaTunesLog('PLAYER', `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`);
+            gtaTunesLog(
+                'PLAYER',
+                `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`
+            );
             this.locked = false;
             throw e;
         }
 
-        gtaTunesLog('PLAYER', `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`);
+        gtaTunesLog(
+            'PLAYER',
+            `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`
+        );
         this.locked = false;
 
         return true;
@@ -758,17 +773,27 @@ export class LockedPlayerError extends Error {
         );
     }
 
-    static async handleInteraction(player: Player, interaction: Interaction): Promise<void> {
+    static async handleInteraction(
+        player: Player,
+        interaction: Interaction
+    ): Promise<void> {
         if (!interaction.isRepliable()) {
             return;
         }
 
-        await interaction.reply({
-            content: 'The player is currently busy processing another action.',
-            flags: MessageFlags.Ephemeral
-        }).catch((e) => {
-            gtaTunesLog('FAIL', `Failed to reply to interaction about locked player in ${p.magenta(player.guild.name)} (${p.magenta(player.guild.id)}).`, e);
-        });
+        await interaction
+            .reply({
+                content:
+                    'The player is currently busy processing another action.',
+                flags: MessageFlags.Ephemeral
+            })
+            .catch(e => {
+                gtaTunesLog(
+                    'FAIL',
+                    `Failed to reply to interaction about locked player in ${p.magenta(player.guild.name)} (${p.magenta(player.guild.id)}).`,
+                    e
+                );
+            });
     }
 }
 
