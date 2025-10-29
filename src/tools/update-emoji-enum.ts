@@ -38,17 +38,11 @@ import { resolveProjectFile } from '../Core/functions';
 
     gtaTunesLog('INFO', `Saving GTATunesEmoji enum to ${p.blue(outputPath)}`);
 
-    await writeFile(
-        outputPath,
-        enumLines.join('\n') + '\n',
-        { encoding: 'utf-8' }
-    );
+    await writeFile(outputPath, enumLines.join('\n') + '\n', {
+        encoding: 'utf-8'
+    });
 
-
-    gtaTunesLog(
-        'INFO',
-        'Successfully generated GTATunesEmoji enum file.'
-    );
+    gtaTunesLog('INFO', 'Successfully generated GTATunesEmoji enum file.');
 })().catch(e => {
     gtaTunesLog('CRIT', e);
 });
