@@ -18,7 +18,8 @@ import {
     randomNumber,
     registerDiscordEvent,
     requireActivePlayer,
-    songToOpus
+    songToOpus,
+    unix
 } from './functions';
 import {
     ComponentType,
@@ -127,6 +128,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
     private _currentSeeked: number = 0;
     private destroying: boolean = false;
     private locked: boolean = false;
+    private lockedAt: number | null = null;
     private autoplay: boolean = false;
 
     constructor(
@@ -288,7 +290,9 @@ export class Player extends EventEmitter<PlayerEventMap> {
                 return;
             }
 
-            await this.playSong('next');
+            this.lock(async () => {
+                await this.playSong('next');
+            }).catch(() => null);
         });
 
         this.on('play', () => {
@@ -719,13 +723,24 @@ export class Player extends EventEmitter<PlayerEventMap> {
      * @param action The action to execute while the player is locked.
      * @param interaction Optional Discord interaction for error handling.
      * @throws {LockedPlayerError} if the player is already locked and no interaction is provided.
-     * @returns The result of the action or null if handled via interaction.
+     * @returns Whether the player was successfully locked and the action executed.
      */
     async lock(
         action: () => PossiblyAsync<void>,
         interaction?: Interaction
     ): Promise<boolean> {
-        if (this.locked) {
+        let isLocked = this.isLocked;
+        const lockedAt = this.lockedAt;
+        this.locked = true;
+        this.lockedAt = unix();
+
+        if (lockedAt !== null && isLocked && (unix() - (lockedAt ?? 0) > 20)) {
+            gtaTunesLog('PLAYER', `Player lock in guild ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}) has expired, forcing unlock.`);
+            isLocked = false;
+            this.lockedAt = null;
+        }
+
+        if (isLocked) {
             gtaTunesLog(
                 'PLAYER',
                 `Player in guild ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}) is already locked.`
@@ -743,16 +758,16 @@ export class Player extends EventEmitter<PlayerEventMap> {
             'PLAYER',
             `Locking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`
         );
-        this.locked = true;
 
         try {
             await action();
         } catch (e) {
             gtaTunesLog(
                 'PLAYER',
-                `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`
+                `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}) after failing action.`
             );
             this.locked = false;
+            this.lockedAt = null;
             throw e;
         }
 
@@ -761,6 +776,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
             `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`
         );
         this.locked = false;
+        this.lockedAt = null;
 
         return true;
     }
