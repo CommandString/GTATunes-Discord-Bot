@@ -17,6 +17,9 @@ export type PlaySongOptions = {
     iv: never;
 };
 
+/**
+ * @throws {Response|Error} When the fetch fails or the response is not ok
+ */
 export default class GTATunesSDK {
     constructor(public baseUri: string = 'https://gtatunes.net') {}
 
@@ -32,10 +35,17 @@ export default class GTATunesSDK {
         const loggedUrl = `${uri}?${qs(query)}`;
         gtaTunesLog(
             'GTAT',
-            `[${p.cyan('REQ')}] [${p.dim('...')}] ${loggedUrl}`
+            `[${p.dim('...')}] ${loggedUrl}`
         );
 
-        const res = await fetch(this.buildUrl(uri, query), init);
+        let res: Response;
+
+        try {
+            res = await fetch(this.buildUrl(uri, query), init);
+        } catch (e) {
+            gtaTunesLog('FAIL', `Failed to fetch ${loggedUrl}`, e);
+            throw e;
+        }
 
         const statusColor: LevelFormatter | null =
             {
@@ -47,7 +57,7 @@ export default class GTATunesSDK {
 
         gtaTunesLog(
             'GTAT',
-            `[${p.green('RES')}] [${statusColor(res.status.toString())}] ${loggedUrl}`
+            `[${statusColor(res.status.toString())}] ${loggedUrl}`
         );
 
         if (!res.ok) {
