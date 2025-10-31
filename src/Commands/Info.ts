@@ -42,7 +42,7 @@ export class InfoCommand extends ApplicationCommandHandler {
                 },
                 {
                     name: 'Discord Bot Version',
-                    value: 'v1'
+                    value: 'v1.1.1'
                 }
             ])
             .setAuthor({

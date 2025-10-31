@@ -50,7 +50,7 @@ const EVENT_HANDLERS: EventHandler<ClientEventName>[] = [
 (async () => {
     console.log(red(await figletText('GTATunes Bot', { font: 'Speed' })));
     console.log(
-        `${dim(`v1.0.0`)} - ${runningInDevMode() ? yellow('DEV') : green('PROD')}`
+        `${dim(`v1.1.1`)} - ${runningInDevMode() ? yellow('DEV') : green('PROD')}`
     );
 
     const client = new Client({
