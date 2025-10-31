@@ -51,7 +51,7 @@ export class InfoCommand extends ApplicationCommandHandler {
                 iconURL: 'https://cmdstr.dev/logo.png'
             })
             .setFooter({
-                text: 'Created'
+                text: 'Established'
             })
             .setTimestamp(new Date(Date.UTC(2024, 6, 9, 5, 50, 0)));
 
