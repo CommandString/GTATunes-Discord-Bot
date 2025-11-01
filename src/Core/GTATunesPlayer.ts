@@ -728,13 +728,13 @@ export class Player extends EventEmitter<PlayerEventMap> {
     async lock(
         action: () => PossiblyAsync<void>,
         interaction?: Interaction
-    ): Promise<boolean> {
+    ): Promise<void> {
         let isLocked = this.isLocked;
         const lockedAt = this.lockedAt;
         this.locked = true;
-        this.lockedAt = unix();
+        this.lockedAt ??= unix();
 
-        if (lockedAt !== null && isLocked && (unix() - (lockedAt ?? 0) > 20)) {
+        if (lockedAt !== null && isLocked && (unix() - lockedAt > 20)) {
             gtaTunesLog('PLAYER', `Player lock in guild ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}) has expired, forcing unlock.`);
             isLocked = false;
             this.lockedAt = null;
@@ -748,7 +748,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
 
             if (interaction) {
                 await LockedPlayerError.handleInteraction(this, interaction);
-                return false;
+                return;
             }
 
             throw new LockedPlayerError(this);
@@ -759,26 +759,23 @@ export class Player extends EventEmitter<PlayerEventMap> {
             `Locking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`
         );
 
-        try {
-            await action();
-        } catch (e) {
+        const unlock = () => {
             gtaTunesLog(
                 'PLAYER',
-                `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}) after failing action.`
+                `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`
             );
             this.locked = false;
             this.lockedAt = null;
-            throw e;
         }
 
-        gtaTunesLog(
-            'PLAYER',
-            `Unlocking player in ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}).`
-        );
-        this.locked = false;
-        this.lockedAt = null;
-
-        return true;
+        try {
+            await action();
+            setTimeout(() => unlock(), 1500);
+        } catch (e) {
+            gtaTunesLog('FAIL', 'Locked player action failed', e);
+            unlock();
+            throw e;
+        }
     }
 }
 
