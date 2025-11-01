@@ -734,8 +734,11 @@ export class Player extends EventEmitter<PlayerEventMap> {
         this.locked = true;
         this.lockedAt ??= unix();
 
-        if (lockedAt !== null && isLocked && (unix() - lockedAt > 20)) {
-            gtaTunesLog('PLAYER', `Player lock in guild ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}) has expired, forcing unlock.`);
+        if (lockedAt !== null && isLocked && unix() - lockedAt > 20) {
+            gtaTunesLog(
+                'PLAYER',
+                `Player lock in guild ${p.magenta(this.guild.name)} (${p.magenta(this.guild.id)}) has expired, forcing unlock.`
+            );
             isLocked = false;
             this.lockedAt = null;
         }
@@ -766,7 +769,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
             );
             this.locked = false;
             this.lockedAt = null;
-        }
+        };
 
         try {
             await action();

@@ -33,10 +33,7 @@ export default class GTATunesSDK {
         init?: RequestInit
     ): Promise<Response> {
         const loggedUrl = `${uri}?${qs(query)}`;
-        gtaTunesLog(
-            'GTAT',
-            `[${p.dim('...')}] ${loggedUrl}`
-        );
+        gtaTunesLog('GTAT', `[${p.dim('...')}] ${loggedUrl}`);
 
         let res: Response;
 
